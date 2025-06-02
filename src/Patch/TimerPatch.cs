@@ -92,14 +92,15 @@ public class TimerPatch
 
                     // Check if it's a record and update the records if necessary
                     int spawnPointIndex = SpawnMap.shownSpawnPoint - 1; // -1 to start at index 0
-                    bool isRecord = timer.IsRecord(spawnPointIndex, finalTime);
+                    bool isRecord = RecordsHandler.IsRecord(spawnPointIndex, finalTime);
 
                     // Display 'New record' notification if it's a record
                     if (isRecord)
                     {
                         Melon<Plugin>.Logger.Msg($"New record for spawn {spawnPointIndex + 1}! Time: {finalTime}s");
-                        timer.UpdateRecord(spawnPointIndex, finalTime);
                         __instance.subtitleText.text = "<color=green>New record!</color>";
+
+                        RecordsHandler.UpdateRecord(spawnPointIndex, finalTime);
                     }
                     // Small easter egg for fast players
                     else if (finalTime < 120)

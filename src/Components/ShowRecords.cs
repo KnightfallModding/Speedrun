@@ -10,6 +10,8 @@ public class ShowRecords : MonoBehaviour
 
     private void Start()
     {
+        RecordsHandler.LoadRecords();
+
         Canvas minimapChoiceCanvas = Plugin.spawnMap.GetComponent<Canvas>();
                
         // Add 'Best times' text
@@ -73,7 +75,7 @@ public class ShowRecords : MonoBehaviour
 
     public void UpdateRecordsTables()
     {
-        float[] records = Utils.GetRecordsList();
+        float[] records = RecordsHandler.GetRecords();
 
         string recordsTable1 = "";
         string recordsTable2 = "";

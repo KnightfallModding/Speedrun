@@ -13,7 +13,6 @@ internal class Plugin : MelonMod
 {
     public static MelonPreferences_Entry<bool> ENABLED;
     public static MelonPreferences_Entry<KeyCode> MAP_KEY;
-    public static MelonPreferences_Entry<float[]> TIME_RECORDS;
     private static GameObject minimapChoiceGO;
     public static SpawnMap spawnMap;
     public static ShowRecords showRecords;
@@ -40,7 +39,6 @@ internal class Plugin : MelonMod
 
         ENABLED = mlCategory.CreateEntry("Enabled", true);
         MAP_KEY = mlCategory.CreateEntry("ToggleMapKey", KeyCode.M);
-        TIME_RECORDS = mlCategory.CreateEntry("TimeRecords", Utils.GetDefaultRecordsList());
 
         // Remove all Harmony Patches
         if (!ENABLED.Value)

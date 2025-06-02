@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Linq;
 using MelonLoader;
 using MelonLoader.Utils;
+using System;
 
 namespace Speedrun;
 
@@ -88,8 +89,4 @@ public static class Utils
 
         return minimapSprite;
     }
-
-    public static float[] GetDefaultRecordsList() => [.. Enumerable.Repeat(-1f, 14)];
-    public static float[] GetRecordsList() => Plugin.TIME_RECORDS.Value;
-    public static void SaveRecords(float[] recordsList) => Plugin.TIME_RECORDS.Value = recordsList;
 }
