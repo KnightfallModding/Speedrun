@@ -5,6 +5,7 @@ using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 using Il2CppInterop.Runtime.Injection;
 
 namespace Speedrun;
@@ -15,6 +16,7 @@ public class Plugin : BasePlugin
     internal static new ManualLogSource Log;
     public static ConfigEntry<bool> ENABLED;
     public static ConfigEntry<KeyCode> MAP_KEY;
+    public static ConfigEntry<string> TIME_RECORDS;
     private static Harmony harmony;
     private static GameObject minimapChoiceGO;
     public static SpawnMap spawnMap;
@@ -68,8 +70,12 @@ public class Plugin : BasePlugin
 
     private void InitConfig()
     {
+        // Populate list with 14 "-1" values
+        float[] defaultRecords = [-1,-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1];
+
         ENABLED = Config.Bind("General", "Enabled", true, "Enable or disable the Speedrun mod.");
         MAP_KEY = Config.Bind("Keybinds", "ToggleMapKey", KeyCode.M, "The key used to show or hide the spawn minimap.");
+        TIME_RECORDS = Config.Bind("General", "TimeRecords", string.Join(";", defaultRecords), "List of best times for each spawn point.");
     }
 
     // May be useful for future use

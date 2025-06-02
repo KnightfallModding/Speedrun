@@ -2,6 +2,8 @@ using System.IO;
 using Photon.Pun;
 using UnityEngine;
 using UniverseLib;
+using System;
+using System.Linq;
 
 namespace Speedrun;
 public static class Utils
@@ -83,5 +85,44 @@ public static class Utils
         }
 
         return minimapSprite;
+    }
+
+    public static Sprite LoadTimeRecordsFromConfig()
+    {
+        AssetBundle assetBundle = Utils.LoadOrGetKnightfallBundle();
+        if (assetBundle == null)
+            return null;
+
+        Sprite minimapSprite = null;
+        Texture2D texture = assetBundle.LoadAsset<Texture2D>("Assets/Sprites/minimap-v2.jpg");
+        if (texture != null)
+        {
+            // Convert the Texture2D to a Sprite (if necessary for UI)
+            minimapSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+        }
+
+        return minimapSprite;
+    }
+
+    // Helper method to parse a comma-separated string into a float array
+    // for the TimeRecords config
+    public static float[] GetRecordsList()
+    {
+        try
+        {
+            string value = Plugin.TIME_RECORDS.Value;
+            return value.Split(';').Select(float.Parse).ToArray();
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.LogError($"Failed to parse float list: {ex.Message}");
+            return [-1,-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]; // Return default if parsing fails
+        }
+    }
+
+    // Helper method to save a float array back to the config
+    public static void SaveRecords(float[] recordsList)
+    {
+        Plugin.TIME_RECORDS.Value = string.Join(";", recordsList);
     }
 }

@@ -78,6 +78,9 @@
     <Reference Include="UnityEngine.InputLegacyModule">
       <HintPath>src\Libs\UnityEngine.InputLegacyModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>src\Libs\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>src\Libs\UnityEngine.UI.dll</HintPath>
     </Reference>

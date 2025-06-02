@@ -52,6 +52,7 @@ public class SpawnMap : MonoBehaviour
     private static TextMeshProUGUI choiceTMPro;
     public static int chosenSpawnPoint = -1;
     private static int chosenSpawnPoint_Unmapped = -1;
+    public static int shownSpawnPoint = -1;
     private static List<Image> buttonImages = new List<Image>();
 
     public void Start()
@@ -275,6 +276,11 @@ public class SpawnMap : MonoBehaviour
         {
             this.GetComponent<Canvas>().enabled = true;
         }
+
+        foreach (Image img in buttonImages)
+        {
+            img.gameObject.SetActive(true);
+        }
     }
 
     public void HideMap()
@@ -282,6 +288,13 @@ public class SpawnMap : MonoBehaviour
         if (this.GetComponent<Canvas>() != null)
         {
             this.GetComponent<Canvas>().enabled = false;
+        }
+
+        // We must also SetActive(false) to prevent the buttons from being navigable
+        // using arrow keys while the map is hidden
+        foreach (Image img in buttonImages)
+        {
+            img.gameObject.SetActive(false);
         }
     }
 
@@ -325,6 +338,7 @@ public class SpawnMap : MonoBehaviour
         {
             chosenSpawnPoint = -1;
             chosenSpawnPoint_Unmapped = -1;
+            shownSpawnPoint = -1;
             choiceTMPro.text = DEFAULT_SPAWN_TEXT;
         }
         else
@@ -332,10 +346,11 @@ public class SpawnMap : MonoBehaviour
             // Set chosen index to be accessed globally AFTER mapping to real in-game spawn point order
             chosenSpawnPoint_Unmapped = spawnIndex;
             chosenSpawnPoint = spawnPointOrderMapping[spawnIndex];
-            choiceTMPro.text = $"<b>Forced Spawn point: <color=red>{chosenSpawnPoint_Unmapped + 1}</color></b>";
+            shownSpawnPoint = chosenSpawnPoint_Unmapped + 1; // This correspond to the ACTUAL number of the spawnpoint on the SpeedrunMap
+            choiceTMPro.text = $"<b>Forced Spawn point: <color=red>{shownSpawnPoint}</color></b>";
 
             #if DEBUG
-            choiceTMPro.text += $"<color=red> (unmapped: {chosenSpawnPoint})</color>";
+            choiceTMPro.text += $"<color=red> (mapped: {chosenSpawnPoint})</color>";
             #endif
         }
     }

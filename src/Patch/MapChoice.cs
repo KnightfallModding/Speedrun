@@ -24,13 +24,14 @@ public class MapChoice
         [HarmonyPrefix]
         static void InitPlayerPrefix(ref int i, int j, Team currTeam)
         {
-            // Plugin is either disable, or we are not in a custom game
+            // Plugin is either disabled, or we are not in a custom game
             // or we did not choose a specific spawn point
             if (!Plugin.ENABLED.Value || !Utils.IsCustomGame())
                 return;
 
             // If we did actually choose a specific spawn point
-            if (SpawnMap.chosenSpawnPoint != -1)
+            // Move all players of our team to the chosen spawn point
+            if (SpawnMap.chosenSpawnPoint != -1 && currTeam.TeamID == Player.localplayer.TeamID)
             {
                 i = SpawnMap.chosenSpawnPoint;
             }
@@ -46,7 +47,7 @@ public class MapChoice
         [HarmonyPostfix]
         static void PSC_Postfix()
         {
-            // Just make sure the map is closed when a user joins the lobby
+            // Just make sure the map is closed when the user joins the lobby
             // This is to prevent the map from staying open after a custom game
             // for example
             Plugin.spawnMap.HideMap();
