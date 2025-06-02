@@ -1,0 +1,101 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>t1nquen.knightfall.speedrun</AssemblyName>
+    <Product>Speedrun</Product>
+    <Version>1.0.0</Version>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
+    <RestoreAdditionalProjectSources>
+      https://api.nuget.org/v3/index.json;
+      https://nuget.bepinex.dev/v3/index.json;
+      https://nuget.samboy.dev/v3/index.json
+    </RestoreAdditionalProjectSources>
+    <RootNamespace>Speedrun</RootNamespace>
+    <!-- DLL output name -->
+    <TargetName>$(Product)</TargetName> 
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- TO-CHANGE: Path to the Steam folder containing the Knightfall dev EXE game -->
+    <DevExe>$(UserProfile)\Documents\PC_FIXE\hacking\Knightfall\Steam\$(Product)\$(Product).exe</DevExe>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PluginRuntimePath>$(DevExe)\..\BepInEx\plugins\$(Product)</PluginRuntimePath>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
+  </ItemGroup>
+
+   <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>src\Libs\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="AsmResolver">
+      <HintPath>src\Libs\AsmResolver.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>src\Libs\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx.Core">
+      <HintPath>src\Libs\BepInEx.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx.Preloader.Core">
+      <HintPath>src\Libs\BepInEx.Preloader.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx.Unity.Common">
+      <HintPath>src\Libs\BepInEx.Unity.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx.Unity.IL2CPP">
+      <HintPath>src\Libs\BepInEx.Unity.IL2CPP.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppInterop.Runtime">
+      <HintPath>src\Libs\Il2CppInterop.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2Cppmscorlib">
+      <HintPath>src\Libs\Il2Cppmscorlib.dll</HintPath>
+    </Reference>
+    <Reference Include="Photon3Unity3D">
+      <HintPath>src\Libs\Photon3Unity3D.dll</HintPath>
+    </Reference>
+    <Reference Include="PhotonRealtime">
+      <HintPath>src\Libs\PhotonRealtime.dll</HintPath>
+    </Reference>
+    <Reference Include="PhotonUnityNetworking">
+      <HintPath>src\Libs\PhotonUnityNetworking.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>src\Libs\Unity.TextMeshPro.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>src\Libs\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>src\Libs\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>src\Libs\UnityEngine.InputLegacyModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>src\Libs\UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>src\Libs\UnityEngine.UIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UniverseLib.BIE.IL2CPP.Interop">
+      <HintPath>src\Libs\UniverseLib.BIE.IL2CPP.Interop.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="taskkill /f /fi &quot;imagename eq $(Product).exe&quot;" />
+  </Target>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">   
+    <!-- Copy DLL and run modded game -->
+    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(PluginRuntimePath)\&quot;" />
+    <Exec Command="&quot;$(DevExe)&quot;" />
+</Target>
+</Project>
