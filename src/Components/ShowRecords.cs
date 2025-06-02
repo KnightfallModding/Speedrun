@@ -1,5 +1,6 @@
 using Il2CppTMPro;
 using UnityEngine;
+using MelonLoader;
 using UnityEngine.UI;
 
 namespace Speedrun;
@@ -11,6 +12,8 @@ public class ShowRecords : MonoBehaviour
     private void Start()
     {
         RecordsHandler.LoadRecords();
+
+        Melon<Plugin>.Logger.Msg($"Loaded records from config: {RecordsHandler.AsString()}");
 
         Canvas minimapChoiceCanvas = Plugin.spawnMap.GetComponent<Canvas>();
                

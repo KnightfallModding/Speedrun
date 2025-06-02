@@ -355,7 +355,6 @@ public class SpawnMap : MonoBehaviour
         {
             chosenSpawnPoint = 0;
             chosenSpawnPoint_Unmapped = 0;
-            // shownSpawnPoint = 1;
             DisplaySpawnPoint();
         }
         else
@@ -363,7 +362,6 @@ public class SpawnMap : MonoBehaviour
             // Set chosen index to be accessed globally AFTER mapping to real in-game spawn point order
             chosenSpawnPoint_Unmapped = spawnIndex;
             chosenSpawnPoint = spawnPointOrderMapping[spawnIndex];
-            // shownSpawnPoint = chosenSpawnPoint_Unmapped + 1; // This correspond to the ACTUAL number of the spawnpoint on the SpeedrunMap
             DisplaySpawnPoint();
         }
     }

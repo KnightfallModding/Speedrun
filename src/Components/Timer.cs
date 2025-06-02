@@ -16,10 +16,6 @@ public class Timer : MonoBehaviour
     {
         hasStarted = true;
         timerText = this.GetComponent<TextMeshProUGUI>();
-        RecordsHandler.LoadRecords();
-        #if DEBUG
-        Melon<Plugin>.Logger.Msg($"Loaded records from config: {RecordsHandler.AsString()}");
-        #endif
     }
 
     private void Update() {
@@ -38,7 +34,7 @@ public class Timer : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.B)) {
             GameObject horse = Player.localplayer.data.belovedHorse.gameObject;
-            horse.transform.position = new Vector3(-11f, 256.9f, 2200f); // Castle
+            horse.transform.position = transform.position = new Vector3(-523f, 156f, 580f); // Court
         }
         #endif
     }
@@ -53,22 +49,23 @@ public class Timer : MonoBehaviour
 
     public string GetTimerFullText()
     {
-        int spawn = SpawnMap.shownSpawnPoint; // This is required to display the 'expected' spawn point to the user.
-                                              // This corresponds to the actual numbers shown on the SpeedrunMap.
+        // This is required to display the 'expected' spawn point to the user.
+        // This corresponds to the actual numbers shown on the SpeedrunMap.
+        int spawn = SpawnMap.shownSpawnPoint;
         float record = RecordsHandler.GetRecord(spawn-1);
 
         string formattedBest = record != -1 ? GetFormattedTime(record) : "N/A";
-
-        string text = $"<size=45%>Spawn {spawn} (best: {formattedBest})\n</size>";
+        
         // Change color based on time comparison with records
-        if (RecordsHandler.IsRecord(spawn-1, timer))
-        {
-            text += "<color=green>";
-        }
-        else
-        {
-            text += "<color=red>";
-        }
+        bool isRecord = RecordsHandler.IsRecord(spawn - 1, timer);
+
+        string text = "";
+        text += "<size=45%>";
+        text += $"Spawn {spawn} ";
+        text += $"(best: {formattedBest})\n";
+        text += "</size>";
+
+        text += isRecord ? "<color=green>" : "<color=red>";
         text += GetFormattedTime(this.timer);
         text += "</color>";
 
