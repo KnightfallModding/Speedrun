@@ -1,5 +1,6 @@
 using HarmonyLib;
-using Landfall.Network;
+using Il2Cpp;
+using Il2CppLandfall.Network;
 
 namespace Speedrun;
 

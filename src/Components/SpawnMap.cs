@@ -1,32 +1,42 @@
-using TMPro;
+using Il2CppTMPro;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using UniverseLib;
+using UnityEngine.Events;
+using MelonLoader;
 
 namespace Speedrun;
 public class SpawnMap : MonoBehaviour
 {
     private Vector2[] spawnPointCoordInJPG =
     {
-            new Vector2(40, 1640),   // 1 - added X offset by hand
-            new Vector2(218, 1640),
-            new Vector2(139, 1446),
-            new Vector2(369, 1590),  // 4
-            new Vector2(568, 1445),
-            new Vector2(817, 1485),
-            new Vector2(925, 1615),
-            new Vector2(1130, 1460), // 8
-            new Vector2(1294, 1595),
-            new Vector2(1361, 1471), // 10
-            new Vector2(1680, 1332),
-            new Vector2(1748, 800),  // 12 - added Y offset by hand
-            new Vector2(1485, 350),  // 13 - added Y offset by hand
-            new Vector2(1624, 180)   // 14 - added Y offset by hand
+            new(40, 1640),   // 1 - added X offset by hand
+            new(218, 1640),
+            new(139, 1446),
+            new(369, 1590),  // 4
+            new(568, 1445),
+            new(817, 1485),
+            new(925, 1615),
+            new(1130, 1460), // 8
+            new(1294, 1595),
+            new(1361, 1471), // 10
+            new(1680, 1332),
+            new(1748, 800),  // 12 - added Y offset by hand
+            new(1485, 350),  // 13 - added Y offset by hand
+            new(1624, 180)   // 14 - added Y offset by hand
     };
-
+    
+    // Actual spawn order based on the map from discord
+    //
+    // Spawn numbers are based off the map
+    // List order is based on `RPCA_InitPlayer(int spawnID)`
+    //
+    // This means that the first spawn of the list will be the one you spawn to
+    // when calling `RPCA_InitPlayer(0)` and the last one for `RPCA_InitPlayer(13)`
+    //
+    // Spawn order: 1, 2, 4, 6, 7, 9, 10, 11, 12, 13, 14, 3, 8, 5
     public int[] spawnPointOrderMapping = // I won't even explain how I obtained these... xd
     [
         0,
@@ -46,7 +56,7 @@ public class SpawnMap : MonoBehaviour
     ];
 
     private static Vector2 minimapSize = new(500, 500); // NOTE: Do NOT change this. Minimap coords are supposed to be dynamic but for some reason it does not work at all with other values than (500, 500)
-    private static Vector2 spawnButtonSize = new Vector2(30, 30);
+    private static Vector2 spawnButtonSize = new(30, 30);
     private static TextMeshProUGUI choiceTMPro;
 
     public static int chosenSpawnPoint = 0;
@@ -61,21 +71,21 @@ public class SpawnMap : MonoBehaviour
         }
     }
     public static int shownSpawnPoint = 1; // always chosenSpawnPoint_Unmapped+1
-    private static List<Image> buttonImages = new List<Image>();
+    private static List<Image> buttonImages = new();
 
     public void Start()
     {
-        var logger = BepInEx.Logging.Logger.CreateLogSource("SpawnMap");
+        // var logger = BepInEx.Logging.Logger.CreateLogSource("SpawnMap");
 
         // 1. Load minimap image & find canvas
         Sprite minimapSprite = Utils.LoadMinimapSprite();
 
-        logger.LogMessage($"Creating minimap with choices...");
+        Melon<Plugin>.Logger.Msg($"Creating minimap with choices...");
 
         Canvas minimapChoiceCanvas = this.gameObject.GetComponent<Canvas>();
 
         // 2. Create an Image UI element to display the minimap
-        GameObject minimapObject = new GameObject("MinimapChoiceImage");
+        GameObject minimapObject = new("MinimapChoiceImage");
         minimapObject.transform.SetParent(minimapChoiceCanvas.transform);
 
         // Add Image component to display the minimap sprite
@@ -92,7 +102,7 @@ public class SpawnMap : MonoBehaviour
         int originalWidth = 1853;
         int originalHeight = 1707;
 
-        Vector2 canvasOffset = new Vector2(-20, 30); // 20 pixels from bottom and 30 for right
+        Vector2 canvasOffset = new(-20, 30); // 20 pixels from bottom and 30 for right
         Vector2 canvasSize = minimapSize;
 
         // Calculate the scale multiplier based on the original image dimensions and the canvas size
@@ -108,8 +118,6 @@ public class SpawnMap : MonoBehaviour
         rectTransform.anchoredPosition = canvasOffset;
         rectTransform.sizeDelta = new Vector2(500, 500);
 
-        logger.LogMessage($"Minimap instantiated !");
-
         // Add a button on each spawn point of the map
         // Need to get the spawnpoint coordinates on the minimap JPEG
         // ..........................................................
@@ -120,10 +128,10 @@ public class SpawnMap : MonoBehaviour
             // Scale the points based on the scale factor
             float scaledX = jpgPoint.x * scaleFactor;
             float scaledY = jpgPoint.y * scaleFactor;
-            // logger.LogMessage($"ScaledX = {scaledX} | ScaledY = {scaledY}");
+            // Melon<Plugin>.Logger.Msg($"ScaledX = {scaledX} | ScaledY = {scaledY}");
 
             // Create a button at the calculated position
-            GameObject buttonObject = new GameObject($"SpawnPointButton{i}");
+            GameObject buttonObject = new($"SpawnPointButton{i}");
             buttonObject.transform.SetParent(minimapChoiceCanvas.transform);
 
             // Add Button and Image components to the button
@@ -141,7 +149,7 @@ public class SpawnMap : MonoBehaviour
             float finalX = (scaledX + canvasOffset.x) - canvasSize.x;
             float finalY = canvasSize.y - (scaledY); // Adjust the Y axis to match Unity's coordinate system (bottom-left origin)
 
-            Vector2 buttonPosition = new Vector2(finalX, finalY);
+            Vector2 buttonPosition = new(finalX, finalY);
 
             RectTransform buttonRectTransform = buttonObject.GetComponent<RectTransform>();
             buttonRectTransform.sizeDelta = spawnButtonSize;
@@ -157,15 +165,15 @@ public class SpawnMap : MonoBehaviour
             EventTrigger trigger = buttonObject.AddComponent<EventTrigger>();
 
             // Set up OnPointerEnter event
-            EventTrigger.Entry enterEntry = new EventTrigger.Entry();
+            EventTrigger.Entry enterEntry = new();
             enterEntry.eventID = EventTriggerType.PointerEnter;
-            enterEntry.callback.AddListener((eventData) => { OnPointerEnter(spawnIndex); });
+            enterEntry.callback.AddListener((UnityAction<BaseEventData>)((eventData) => { OnPointerEnter(spawnIndex); }));
             trigger.triggers.Add(enterEntry);
 
             // Set up OnPointerExit event
-            EventTrigger.Entry exitEntry = new EventTrigger.Entry();
+            EventTrigger.Entry exitEntry = new();
             exitEntry.eventID = EventTriggerType.PointerExit;
-            exitEntry.callback.AddListener((eventData) => { OnPointerExit(spawnIndex); });
+            exitEntry.callback.AddListener((UnityAction<BaseEventData>)((eventData) => { OnPointerExit(spawnIndex); }));
             trigger.triggers.Add(exitEntry);
 
             // Store the button reference
@@ -174,12 +182,12 @@ public class SpawnMap : MonoBehaviour
         }
 
         // Add a button to reset the current choice to 'random'
-        GameObject resetButtonObject = new GameObject($"ResetChoiceButton");
+        GameObject resetButtonObject = new($"ResetChoiceButton");
         Button resetButton = resetButtonObject.AddComponent<Button>();
         Image resetButtonImage = resetButtonObject.AddComponent<Image>();
         resetButtonObject.transform.SetParent(minimapChoiceCanvas.transform);
 
-        AssetBundle assetBundle = Utils.LoadOrGetKnightfallBundle();
+        Il2CppAssetBundle assetBundle = Utils.LoadOrGetKnightfallBundle();
         Sprite resetButtonSprite = null;
 
         Texture2D texture = assetBundle.LoadAsset<Texture2D>("Assets/Sprites/refresh.png");
@@ -205,21 +213,21 @@ public class SpawnMap : MonoBehaviour
         EventTrigger resetTrigger = resetButtonObject.AddComponent<EventTrigger>();
         
         // Set up OnPointerEnter event
-        EventTrigger.Entry resetEnterEntry = new EventTrigger.Entry();
+        EventTrigger.Entry resetEnterEntry = new();
         resetEnterEntry.eventID = EventTriggerType.PointerEnter;
-        resetEnterEntry.callback.AddListener((eventData) => { OnPointerEnter(-1); });
+        resetEnterEntry.callback.AddListener((UnityAction<BaseEventData>)((eventData) => { OnPointerEnter(-1); }));
         resetTrigger.triggers.Add(resetEnterEntry);
 
         // Set up OnPointerExit event
-        EventTrigger.Entry resetExitEntry = new EventTrigger.Entry();
+        EventTrigger.Entry resetExitEntry = new();
         resetExitEntry.eventID = EventTriggerType.PointerExit;
-        resetExitEntry.callback.AddListener((eventData) => { OnPointerExit(-1); });
+        resetExitEntry.callback.AddListener((UnityAction<BaseEventData>)((eventData) => { OnPointerExit(-1); }));
         resetTrigger.triggers.Add(resetExitEntry);
 
         buttonImages.Add(resetButtonImage);
 
         // Add text field to display current choice
-        GameObject choiceTextGO = new GameObject("ChoiceText");
+        GameObject choiceTextGO = new("ChoiceText");
         choiceTextGO.transform.SetParent(minimapChoiceCanvas.transform);
 
         choiceTMPro = choiceTextGO.AddComponent<TextMeshProUGUI>();
@@ -239,7 +247,7 @@ public class SpawnMap : MonoBehaviour
         choiceTextRectTransform.anchoredPosition = new Vector2(x, y);
 
         // Add text field to display instructions
-        GameObject instructionsTextGO = new GameObject("InstructionsText");
+        GameObject instructionsTextGO = new("InstructionsText");
         instructionsTextGO.transform.SetParent(minimapChoiceCanvas.transform);
 
         TextMeshProUGUI instructionsTMPro = instructionsTextGO.AddComponent<TextMeshProUGUI>();

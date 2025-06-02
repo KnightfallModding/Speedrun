@@ -1,8 +1,8 @@
-using System;
+using Il2Cpp;
 using HarmonyLib;
+using MelonLoader;
 using UnityEngine;
-using Il2CppInterop.Runtime.Injection;
-using TMPro;
+using Il2CppTMPro;
 using UnityEngine.UI;
 
 namespace Speedrun;
@@ -21,31 +21,20 @@ public class TimerPatch
             if (!Plugin.ENABLED.Value || !Utils.IsCustomGame())
                 return;
 
-            // Register the timer component to Il2Cpp first
-            // ............................................
-            // Register custom class to Il2Cpp
-            if (!ClassInjector.IsTypeRegisteredInIl2Cpp(typeof(Timer)))
-            {
-                ClassInjector.RegisterTypeInIl2Cpp(typeof(Timer));
-            }
-
             GameObject timerBackgroundGO = new GameObject("SpeedrunTimerBackground");
+
             // Add Image component to the background
             var backgroundImage = timerBackgroundGO.AddComponent<Image>();
-            // backgroundImage.color = Color.black; // Set background to black
             backgroundImage.color = new Color(0, 0, 0, 0.80f);
 
             // Create new gameObject with this component
             // and add it as a child of the main canvas
             GameObject timerGO = new GameObject("SpeedrunTimer");
             timer = timerGO.AddComponent<Timer>();
+
             var timerText = timerGO.AddComponent<TextMeshProUGUI>();
-            // timerText.alignment = TextAlignmentOptions.Right;
             timerText.alignment = TextAlignmentOptions.Center;
             timerText.color = Color.white;
-            // timerText.text = timer.GetFormattedTime();
-
-            // timerBackgroundGO.transform.SetParent(MainCanvas.instance.transform);
 
             foreach (var obj in new GameObject[2] { timerBackgroundGO, timerGO })
             {
@@ -69,20 +58,18 @@ public class TimerPatch
 
             backgroundImage.rectTransform.anchoredPosition = new Vector2(-25, 0);
 
-            // Enable collider because it's normally enabled only on 3rd night
-            GameObject.Find("EndCastle").GetComponent<Farm>().col.enabled = true;
+            // Enable Castle entry collider because it's normally disabled until 3rd day
+            EnableCastleEntryCollider();
         }
     }
 
     [HarmonyPatch(typeof(HeaderHandler), nameof(HeaderHandler.PlayerHeader))]
-    [HarmonyPatch(new Type[] { typeof(HeaderType),typeof(string) })]
+    [HarmonyPatch([typeof(HeaderType), typeof(string)])]
     public class SpeedrunEndingPatch
     {
         [HarmonyPostfix]
         public static void Postfix(HeaderHandler __instance, HeaderType headerType, string townName)
         {
-            Plugin.Log.LogMessage($"HeaderType: {headerType}, TownName: {townName}");
-            
             if (!Plugin.ENABLED.Value || !Utils.IsCustomGame())
                 return;
 
@@ -110,7 +97,7 @@ public class TimerPatch
                     // Display 'New record' notification if it's a record
                     if (isRecord)
                     {
-                        Plugin.Log.LogMessage($"New record for spawn {spawnPointIndex + 1}! {finalTime}");
+                        Melon<Plugin>.Logger.Msg($"New record for spawn {spawnPointIndex + 1}! Time: {finalTime}s");
                         timer.UpdateRecord(spawnPointIndex, finalTime);
                         __instance.subtitleText.text = "<color=green>New record!</color>";
                     }
@@ -125,4 +112,6 @@ public class TimerPatch
             }
         }
     }
+
+    private static void EnableCastleEntryCollider() => GameObject.Find("EndCastle").GetComponent<Farm>().col.enabled = true;
 }

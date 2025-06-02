@@ -1,5 +1,7 @@
+using Il2Cpp;
+using MelonLoader;
 using UnityEngine;
-using TMPro;
+using Il2CppTMPro;
 
 namespace Speedrun;
 
@@ -17,7 +19,7 @@ public class Timer : MonoBehaviour
         timerText = this.GetComponent<TextMeshProUGUI>();
         records = Utils.GetRecordsList();
         #if DEBUG
-        Plugin.Log.LogInfo($"Loaded records from config: {string.Join("; ", records)}");
+        Melon<Plugin>.Logger.Msg($"Loaded records from config: {string.Join("; ", records)}");
         #endif
     }
 
@@ -31,22 +33,13 @@ public class Timer : MonoBehaviour
             timer += 10f;
         }
         if (Input.GetKeyDown(KeyCode.N)) {
-            Player localPlayer = Player.localplayer;
-
-            GameObject myHorse = localPlayer.data?.belovedHorse?.gameObject;
-            if (myHorse == null) return;
-
-            // myHorse.transform.position = new Vector3(-11f, 256.9f, 2264f); // Castle
-            myHorse.transform.position = new Vector3(-11f, 256.9f, 2200f); // Castle
+            GameObject horse = Player.localplayer.data.belovedHorse.gameObject;
+            horse.transform.position = new Vector3(-11f, 256.9f, 2200f); // Castle
         }
 
-        if (Input.GetKeyDown(KeyCode.M)) {
-            Player localPlayer = Player.localplayer;
-
-            GameObject myHorse = localPlayer.data?.belovedHorse?.gameObject;
-            if (myHorse == null) return;
-
-            myHorse.transform.position = new Vector3(-523f, 156f, 580f); // Court
+        if (Input.GetKeyDown(KeyCode.B)) {
+            GameObject horse = Player.localplayer.data.belovedHorse.gameObject;
+            horse.transform.position = new Vector3(-11f, 256.9f, 2200f); // Castle
         }
         #endif
     }
@@ -55,21 +48,6 @@ public class Timer : MonoBehaviour
     {
         if (timerText != null)
         {
-            // Change color based on time comparison with records
-            /*
-            if (timer < records[SpawnMap.chosenSpawnPoint])
-            {
-                timerText.color = Color.green;
-            }
-            else if (timer == records[SpawnMap.chosenSpawnPoint])
-            {
-                timerText.color = Color.white;
-            }
-            else
-            {
-                timerText.color = Color.red;
-            }
-            */
             timerText.text = GetTimerFullText();
         }
     }
@@ -140,7 +118,7 @@ public class Timer : MonoBehaviour
         if (records[spawnPoint] == -1)
             return true;
 
-        return time <= records[spawnPoint]; // <= so that the the time is shown in green when the run ends on a record
+        return time <= records[spawnPoint]; // '<=' so that the time is shown in green when the run ends on a record
     }
 
     public void UpdateRecord(int spawnPoint, float time)
@@ -148,7 +126,7 @@ public class Timer : MonoBehaviour
         if (records == null || spawnPoint < 0 || spawnPoint >= records.Length)
             return;
 
-        Plugin.Log.LogMessage($"Updating record for spawn {spawnPoint + 1} to {time}...");
+        Melon<Plugin>.Logger.Msg($"Updating record for spawn {spawnPoint+1} to {time}...");
 
         records[spawnPoint] = time;
         Utils.SaveRecords(records);

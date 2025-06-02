@@ -1,18 +1,20 @@
+using Il2Cpp;
 using System.IO;
-using Photon.Pun;
+using Il2CppPhoton.Pun;
 using UnityEngine;
-using UniverseLib;
-using System;
 using System.Linq;
+using MelonLoader;
+using MelonLoader.Utils;
 
 namespace Speedrun;
+
 public static class Utils
 {
-    private static AssetBundle knightfallAssetBundle = null;
+    private static Il2CppAssetBundle knightfallAssetBundle = null;
 
     public static string GetFullAssetPath(string assetName)
     {
-        string[] pathArray = { BepInEx.Paths.PluginPath, MyPluginInfo.PLUGIN_NAME, "assets", assetName };
+        string[] pathArray = [MelonEnvironment.ModsDirectory, ModInfo.MOD_NAME, "assets", assetName];
         return Path.Combine(pathArray);
     }
 
@@ -21,7 +23,7 @@ public static class Utils
         return GetFullAssetPath("knightfall.speedrun.bundle");
     }
 
-    public static AssetBundle LoadOrGetKnightfallBundle()
+    public static Il2CppAssetBundle LoadOrGetKnightfallBundle()
     {
         if (knightfallAssetBundle != null)
         {
@@ -30,19 +32,19 @@ public static class Utils
         }
         else
         {
-            Plugin.Log.LogMessage($"Loading knightfall bundle...");
+            Melon<Plugin>.Logger.Msg($"Loading knightfall bundle...");
 
             string bundlePath = GetKnightfallBundlePath();
             if (!File.Exists(bundlePath))
             {
-                Plugin.Log.LogError($"Failed to load bundle from {bundlePath}. Ensure the file exists.");
+                Melon<Plugin>.Logger.Error($"Failed to load bundle from {bundlePath}. Ensure the file exists.");
                 return null;
             }
 
-            knightfallAssetBundle = AssetBundle.LoadFromFile(bundlePath);
+            knightfallAssetBundle = Il2CppAssetBundleManager.LoadFromFile(bundlePath);
             if (knightfallAssetBundle == null)
             {
-                Plugin.Log.LogError($"An error occurred when loading bundle {bundlePath}. The bundle may be corrupted.");
+                Melon<Plugin>.Logger.Error($"An error occurred when loading bundle {bundlePath}. The bundle may be corrupted.");
             }
 
             return knightfallAssetBundle;
@@ -72,7 +74,7 @@ public static class Utils
 
     public static Sprite LoadMinimapSprite()
     {
-        AssetBundle assetBundle = Utils.LoadOrGetKnightfallBundle();
+        Il2CppAssetBundle assetBundle = LoadOrGetKnightfallBundle();
         if (assetBundle == null)
             return null;
 
@@ -80,32 +82,14 @@ public static class Utils
         Texture2D texture = assetBundle.LoadAsset<Texture2D>("Assets/Sprites/minimap-v2.jpg");
         if (texture != null)
         {
-            // Convert the Texture2D to a Sprite (if necessary for UI)
+            // Convert the Texture2D to a Sprite
             minimapSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
         }
 
         return minimapSprite;
     }
 
-    // Helper method to parse a comma-separated string into a float array
-    // for the TimeRecords config
-    public static float[] GetRecordsList()
-    {
-        try
-        {
-            string value = Plugin.TIME_RECORDS.Value;
-            return value.Split(';').Select(float.Parse).ToArray();
-        }
-        catch (Exception ex)
-        {
-            Plugin.Log.LogError($"GetRecordsList -> Failed to parse float list: {ex.Message}");
-            return [-1,-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]; // Return default if parsing fails
-        }
-    }
-
-    // Helper method to save a float array back to the config
-    public static void SaveRecords(float[] recordsList)
-    {
-        Plugin.TIME_RECORDS.Value = string.Join(";", recordsList);
-    }
+    public static float[] GetDefaultRecordsList() => [.. Enumerable.Repeat(-1f, 14)];
+    public static float[] GetRecordsList() => Plugin.TIME_RECORDS.Value;
+    public static void SaveRecords(float[] recordsList) => Plugin.TIME_RECORDS.Value = recordsList;
 }

@@ -4,7 +4,8 @@
     <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>t1nquen.knightfall.speedrun</AssemblyName>
     <Product>Speedrun</Product>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
+    <Author>t1nquen</Author>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RestoreAdditionalProjectSources>
@@ -18,68 +19,49 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <!-- TO-CHANGE: Path to the Steam folder containing the Knightfall dev EXE game -->
-    <DevExe>$(UserProfile)\Documents\PC_FIXE\hacking\Knightfall\Steam\$(Product)\$(Product).exe</DevExe>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PluginRuntimePath>$(DevExe)\..\BepInEx\plugins\$(Product)</PluginRuntimePath>
+    <!-- Path to the Steam folder containing the Knightfall EXE game -->
+    <DevExe>$(UserProfile)\Documents\PC_FIXE\hacking\Knightfall\Steam\$(Product)\Knightfall.exe</DevExe>
+    <PluginRuntimePath>$(DevExe)\..\Mods\</PluginRuntimePath>
+    <ModLink>https://github.com/KnightfallModding/Speedrun</ModLink>
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
+    <PackageReference Include="LavaGang.MelonLoader" Version="0.7.0" />
   </ItemGroup>
 
-   <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>src\Libs\0Harmony.dll</HintPath>
-    </Reference>
-    <Reference Include="AsmResolver">
-      <HintPath>src\Libs\AsmResolver.dll</HintPath>
-    </Reference>
+  <ItemGroup>
+    <!-- Add game Libs -->
     <Reference Include="Assembly-CSharp">
       <HintPath>src\Libs\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="BepInEx.Core">
-      <HintPath>src\Libs\BepInEx.Core.dll</HintPath>
+
+    <!-- Add utils -->
+    <Reference Include="Il2cppmscorlib">
+      <HintPath>src\Libs\Il2cppmscorlib.dll</HintPath>
     </Reference>
-    <Reference Include="BepInEx.Preloader.Core">
-      <HintPath>src\Libs\BepInEx.Preloader.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="BepInEx.Unity.Common">
-      <HintPath>src\Libs\BepInEx.Unity.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="BepInEx.Unity.IL2CPP">
-      <HintPath>src\Libs\BepInEx.Unity.IL2CPP.dll</HintPath>
-    </Reference>
-    <Reference Include="Il2CppInterop.Runtime">
-      <HintPath>src\Libs\Il2CppInterop.Runtime.dll</HintPath>
-    </Reference>
-    <Reference Include="Il2Cppmscorlib">
-      <HintPath>src\Libs\Il2Cppmscorlib.dll</HintPath>
-    </Reference>
-    <Reference Include="Photon3Unity3D">
-      <HintPath>src\Libs\Photon3Unity3D.dll</HintPath>
-    </Reference>
-    <Reference Include="PhotonRealtime">
-      <HintPath>src\Libs\PhotonRealtime.dll</HintPath>
-    </Reference>
-    <Reference Include="PhotonUnityNetworking">
-      <HintPath>src\Libs\PhotonUnityNetworking.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.TextMeshPro">
-      <HintPath>src\Libs\Unity.TextMeshPro.dll</HintPath>
-    </Reference>
+
+    <!-- Add Unity's core modules -->
     <Reference Include="UnityEngine">
       <HintPath>src\Libs\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>src\Libs\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.Il2CppAssetBundleManager">
+      <HintPath>src\Libs\UnityEngine.Il2CppAssetBundleManager.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
       <HintPath>src\Libs\UnityEngine.InputLegacyModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.InputModule">
+      <HintPath>src\Libs\UnityEngine.InputModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
       <HintPath>src\Libs\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>src\Libs\Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>src\Libs\UnityEngine.UI.dll</HintPath>
@@ -87,8 +69,29 @@
     <Reference Include="UnityEngine.UIModule">
       <HintPath>src\Libs\UnityEngine.UIModule.dll</HintPath>
     </Reference>
-    <Reference Include="UniverseLib.BIE.IL2CPP.Interop">
-      <HintPath>src\Libs\UniverseLib.BIE.IL2CPP.Interop.dll</HintPath>
+
+    <!-- Add networking modules -->
+    <Reference Include="Il2CppPhoton3Unity3D">
+      <HintPath>src\Libs\Il2CppPhoton3Unity3D.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Il2CppPhotonRealtime">
+      <HintPath>src\Libs\Il2CppPhotonRealtime.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Il2CppPhotonUnityNetworking">
+      <HintPath>src\Libs\Il2CppPhotonUnityNetworking.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <!-- Add MelonLoader modules -->
+    <Reference Include="Il2CppInterop.Runtime">
+      <HintPath>src\Libs\Il2CppInterop.Runtime.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Harmony">
+      <HintPath>src\Libs\0Harmony.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
 
@@ -96,9 +99,14 @@
     <Exec Command="taskkill /f /fi &quot;imagename eq $(Product).exe&quot;" />
   </Target>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">   
+  <Target Name="BuildCustomFiles" BeforeTargets="Build">
+    <!-- Mimic BepInEx.PluginInfoProps -->
+    <WriteLinesToFile Overwrite="true" File="ModInfo.cs" Lines="namespace $(Product)%3B&#xD;&#xA;&#xD;&#xA;public static class ModInfo&#xD;&#xA;{&#xD;&#xA;  public const string MOD_NAME = &quot;$(Product)&quot;%3B&#xD;&#xA;  public const string MOD_GUID = &quot;$(AssemblyName)&quot;%3B&#xD;&#xA;  public const string MOD_VERSION = &quot;$(Version)&quot;%3B&#xD;&#xA;  public const string MOD_AUTHOR = &quot;$(Author)&quot;%3B&#xD;&#xA;  public const string MOD_LINK = &quot;$(ModLink)&quot;%3B&#xD;&#xA;}&#xD;&#xA;" />
+  </Target>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <!-- Copy DLL and run modded game -->
     <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(PluginRuntimePath)\&quot;" />
-    <Exec Command="&quot;$(DevExe)&quot;" />
-</Target>
+	  <Exec Command="&quot;$(DevExe)&quot;" />
+  </Target>
 </Project>

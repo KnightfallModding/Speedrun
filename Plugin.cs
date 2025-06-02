@@ -1,72 +1,68 @@
-﻿using BepInEx;
-using BepInEx.Logging;
-using BepInEx.Configuration;
-using BepInEx.Unity.IL2CPP;
-using HarmonyLib;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
+using MelonLoader;
 using Il2CppInterop.Runtime.Injection;
+using Speedrun;
+
+[assembly: MelonInfo(typeof(Plugin), ModInfo.MOD_NAME, ModInfo.MOD_VERSION, ModInfo.MOD_AUTHOR, $"{ModInfo.MOD_LINK}/releases/latest/download/Release.zip")]
+[assembly: MelonGame("Landfall Games", "Knightfall")]
 
 namespace Speedrun;
 
-[BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
-public class Plugin : BasePlugin
+internal class Plugin : MelonMod
 {
-    internal static new ManualLogSource Log;
-    public static ConfigEntry<bool> ENABLED;
-    public static ConfigEntry<KeyCode> MAP_KEY;
-    public static ConfigEntry<string> TIME_RECORDS;
-    private static Harmony harmony;
+    public static MelonPreferences_Entry<bool> ENABLED;
+    public static MelonPreferences_Entry<KeyCode> MAP_KEY;
+    public static MelonPreferences_Entry<float[]> TIME_RECORDS;
     private static GameObject minimapChoiceGO;
     public static SpawnMap spawnMap;
     public static ShowRecords showRecords;
 
-    public override void Load()
+    public override void OnInitializeMelon()
     {
-        // Initialize the config file. Needed first to be able to use the 'ENABLED' variable
         InitConfig();
 
         if (!ENABLED.Value)
+        {
+            UnloadMod();
             return;
+        }
 
-        Log = base.Log;
-        Log.LogInfo($"Plugin {MyPluginInfo.PLUGIN_NAME} loaded successfully!");
-        
-        // Register and instantiate the minimap canvas / records table
+        LoggerInstance.Msg($"Plugin {ModInfo.MOD_NAME} loaded successfully!");
+
         RegisterComponents();
         AddMinimapAndRecords();
-
-        // Harmony Patch
-        harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
-        harmony.PatchAll();
     }
 
     private void InitConfig()
     {
-        // Populate list with 14 "-1" values
-        float[] defaultRecords = [-1,-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1];
+        var mlCategory = MelonPreferences.CreateCategory("Speedrun", "Speedrun settings");
 
-        ENABLED = Config.Bind("General", "Enabled", true, "Enable or disable the Speedrun mod.");
-        MAP_KEY = Config.Bind("Keybinds", "ToggleMapKey", KeyCode.M, "The key used to show or hide the spawn minimap.");
-        TIME_RECORDS = Config.Bind("General", "TimeRecords", string.Join(";", defaultRecords), "List of best times for each spawn point.");
+        ENABLED = mlCategory.CreateEntry("Enabled", true);
+        MAP_KEY = mlCategory.CreateEntry("ToggleMapKey", KeyCode.M);
+        TIME_RECORDS = mlCategory.CreateEntry("TimeRecords", Utils.GetDefaultRecordsList());
+
+        // Remove all Harmony Patches
+        if (!ENABLED.Value)
+            UnloadMod();
     }
 
-    private void RegisterComponents()
+    /// <summary>
+    /// Register custom classes to Il2Cpp.
+    /// </summary>
+    private static void RegisterComponents()
     {
-        // Register custom classes to Il2Cpp
         if (!ClassInjector.IsTypeRegisteredInIl2Cpp(typeof(SpawnMap)))
-        {
             ClassInjector.RegisterTypeInIl2Cpp(typeof(SpawnMap));
-        }
 
         if (!ClassInjector.IsTypeRegisteredInIl2Cpp(typeof(ShowRecords)))
-        {
             ClassInjector.RegisterTypeInIl2Cpp(typeof(ShowRecords));
-        }
+
+        if (!ClassInjector.IsTypeRegisteredInIl2Cpp(typeof(Timer)))
+            ClassInjector.RegisterTypeInIl2Cpp(typeof(Timer));
     }
-    
-    private void AddMinimapAndRecords()
+
+    private static void AddMinimapAndRecords()
     {
         // Create a new GameObject with the SpawnMapPlugin component
         minimapChoiceGO = new GameObject("MinimapChoice");
@@ -74,35 +70,22 @@ public class Plugin : BasePlugin
         spawnMap = minimapChoiceGO.AddComponent<SpawnMap>();
 
         // Add a Canvas component to the GameObject
+        // Note: We don't use basePlugin.AddComponent<> because it will end up
+        // on the same GameObject as all other basePlugin.AddComponent<> calls
+        // This object may already have a Canvas component present, which will
+        // cause an exception.
+        // This is for compatibility with other plugins.
         Canvas minimapChoiceCanvas = minimapChoiceGO.AddComponent<Canvas>();
         minimapChoiceCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
         minimapChoiceCanvas.sortingOrder = 102; // Override black background from FadeCanvas with sortingOrder=100 & chatCanvas with sortingOrder=101        
         minimapChoiceGO.AddComponent<CanvasScaler>(); // needed ?
         minimapChoiceGO.AddComponent<GraphicRaycaster>(); // needed for click interactions
         minimapChoiceGO.AddComponent<CanvasGroup>(); // needed ?
-
-        // Instantiate the canvas
-        // Note: We don't use basePlugin.AddComponent<> because it will end up
-        // on the same GameObject as all other basePlugin.AddComponent<> calls
-        // And this object may already have a Canvas component present
-        // This is for compatibility with other plugins
         minimapChoiceGO.hideFlags = HideFlags.HideAndDontSave;
     }
 
-    // May be useful for future use
-    public override bool Unload()
-    {
-        ENABLED.Value = false; 
-
-        // Remove the minimap object
-        if (minimapChoiceGO != null)
-        {
-            GameObject.Destroy(minimapChoiceGO);
-        }
-
-        // Unpatch Harmony
-        harmony.UnpatchSelf();
-
-        return true; // Not sure what to return here
-    }
+    /// <summary>
+    /// Remove all Harmony Patches.
+    /// </summary>
+    private void UnloadMod() => HarmonyInstance.UnpatchSelf();
 }
