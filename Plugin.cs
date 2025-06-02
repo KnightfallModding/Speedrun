@@ -20,6 +20,7 @@ public class Plugin : BasePlugin
     private static Harmony harmony;
     private static GameObject minimapChoiceGO;
     public static SpawnMap spawnMap;
+    public static ShowRecords showRecords;
 
     public override void Load()
     {
@@ -32,24 +33,44 @@ public class Plugin : BasePlugin
         Log = base.Log;
         Log.LogInfo($"Plugin {MyPluginInfo.PLUGIN_NAME} loaded successfully!");
         
-        // Register and instantiate the minimap canvas
-        AddMinimap();
+        // Register and instantiate the minimap canvas / records table
+        RegisterComponents();
+        AddMinimapAndRecords();
 
         // Harmony Patch
         harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
         harmony.PatchAll();
     }
 
-    private void AddMinimap()
+    private void InitConfig()
     {
-        // Register custom class to Il2Cpp
+        // Populate list with 14 "-1" values
+        float[] defaultRecords = [-1,-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1];
+
+        ENABLED = Config.Bind("General", "Enabled", true, "Enable or disable the Speedrun mod.");
+        MAP_KEY = Config.Bind("Keybinds", "ToggleMapKey", KeyCode.M, "The key used to show or hide the spawn minimap.");
+        TIME_RECORDS = Config.Bind("General", "TimeRecords", string.Join(";", defaultRecords), "List of best times for each spawn point.");
+    }
+
+    private void RegisterComponents()
+    {
+        // Register custom classes to Il2Cpp
         if (!ClassInjector.IsTypeRegisteredInIl2Cpp(typeof(SpawnMap)))
         {
             ClassInjector.RegisterTypeInIl2Cpp(typeof(SpawnMap));
         }
 
+        if (!ClassInjector.IsTypeRegisteredInIl2Cpp(typeof(ShowRecords)))
+        {
+            ClassInjector.RegisterTypeInIl2Cpp(typeof(ShowRecords));
+        }
+    }
+    
+    private void AddMinimapAndRecords()
+    {
         // Create a new GameObject with the SpawnMapPlugin component
         minimapChoiceGO = new GameObject("MinimapChoice");
+        showRecords = minimapChoiceGO.AddComponent<ShowRecords>();
         spawnMap = minimapChoiceGO.AddComponent<SpawnMap>();
 
         // Add a Canvas component to the GameObject
@@ -66,16 +87,6 @@ public class Plugin : BasePlugin
         // And this object may already have a Canvas component present
         // This is for compatibility with other plugins
         minimapChoiceGO.hideFlags = HideFlags.HideAndDontSave;
-    }
-
-    private void InitConfig()
-    {
-        // Populate list with 14 "-1" values
-        float[] defaultRecords = [-1,-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1];
-
-        ENABLED = Config.Bind("General", "Enabled", true, "Enable or disable the Speedrun mod.");
-        MAP_KEY = Config.Bind("Keybinds", "ToggleMapKey", KeyCode.M, "The key used to show or hide the spawn minimap.");
-        TIME_RECORDS = Config.Bind("General", "TimeRecords", string.Join(";", defaultRecords), "List of best times for each spawn point.");
     }
 
     // May be useful for future use

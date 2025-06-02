@@ -113,7 +113,7 @@ public class Timer : MonoBehaviour
         return GetFormattedTime(this.timer);
     }
 
-    public string GetFormattedTime(float _timer)
+    public static string GetFormattedTime(float _timer)
     {
         // Format timer to 00:00.00
         int minutes = Mathf.FloorToInt(_timer / 60);

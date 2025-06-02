@@ -25,13 +25,11 @@ public class MapChoice
         static void InitPlayerPrefix(ref int i, int j, Team currTeam)
         {
             // Plugin is either disabled, or we are not in a custom game
-            // or we did not choose a specific spawn point
             if (!Plugin.ENABLED.Value || !Utils.IsCustomGame())
                 return;
 
-            // If we did actually choose a specific spawn point
-            // Move all players of our team to the chosen spawn point
-            if (SpawnMap.chosenSpawnPoint != -1 && currTeam.TeamID == Player.localplayer.TeamID)
+            // Modify the spawn point of our team to the chosen spawn point
+            if (currTeam.TeamID == Player.localplayer.TeamID)
             {
                 i = SpawnMap.chosenSpawnPoint;
             }

@@ -125,14 +125,4 @@ public class TimerPatch
             }
         }
     }
-
-    [HarmonyPatch(typeof(Player), nameof(Player.EnterFarm))]
-    public class EnterFarmPatch
-    {
-        [HarmonyPostfix]
-        public static void Postfix(Player __instance, Farm farm)
-        {
-            Plugin.Log.LogMessage($"EnterFarmPatch: {farm.townName}");
-        }
-    }
 }

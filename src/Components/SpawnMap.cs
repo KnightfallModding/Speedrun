@@ -9,8 +9,6 @@ using UniverseLib;
 namespace Speedrun;
 public class SpawnMap : MonoBehaviour
 {
-    private static string DEFAULT_SPAWN_TEXT = "Default spawn point (Study)";
-
     private Vector2[] spawnPointCoordInJPG =
     {
             new Vector2(40, 1640),   // 1 - added X offset by hand
@@ -50,9 +48,19 @@ public class SpawnMap : MonoBehaviour
     private static Vector2 minimapSize = new(500, 500); // NOTE: Do NOT change this. Minimap coords are supposed to be dynamic but for some reason it does not work at all with other values than (500, 500)
     private static Vector2 spawnButtonSize = new Vector2(30, 30);
     private static TextMeshProUGUI choiceTMPro;
-    public static int chosenSpawnPoint = -1;
-    private static int chosenSpawnPoint_Unmapped = -1;
-    public static int shownSpawnPoint = -1;
+
+    public static int chosenSpawnPoint = 0;
+    private static int _chosenSpawnPoint_Unmapped;
+    public static int chosenSpawnPoint_Unmapped
+    {
+        get => _chosenSpawnPoint_Unmapped;
+        set
+        {
+            _chosenSpawnPoint_Unmapped = value;
+            shownSpawnPoint = _chosenSpawnPoint_Unmapped + 1;
+        }
+    }
+    public static int shownSpawnPoint = 1; // always chosenSpawnPoint_Unmapped+1
     private static List<Image> buttonImages = new List<Image>();
 
     public void Start()
@@ -215,7 +223,6 @@ public class SpawnMap : MonoBehaviour
         choiceTextGO.transform.SetParent(minimapChoiceCanvas.transform);
 
         choiceTMPro = choiceTextGO.AddComponent<TextMeshProUGUI>();
-        choiceTMPro.text = DEFAULT_SPAWN_TEXT;
         choiceTMPro.fontSize = 25;
         choiceTMPro.alignment = TextAlignmentOptions.Center;
 
@@ -250,6 +257,8 @@ public class SpawnMap : MonoBehaviour
         float yy = 15;                                                            // Under the minimap
 
         instructionsTextRectTransform.anchoredPosition = new Vector2(xx, yy);
+
+        DisplaySpawnPoint();
     }
 
     private void Update()
@@ -336,22 +345,29 @@ public class SpawnMap : MonoBehaviour
         // Reset button
         if (spawnIndex == -1)
         {
-            chosenSpawnPoint = -1;
-            chosenSpawnPoint_Unmapped = -1;
-            shownSpawnPoint = -1;
-            choiceTMPro.text = DEFAULT_SPAWN_TEXT;
+            chosenSpawnPoint = 0;
+            chosenSpawnPoint_Unmapped = 0;
+            // shownSpawnPoint = 1;
+            DisplaySpawnPoint();
         }
         else
         {
             // Set chosen index to be accessed globally AFTER mapping to real in-game spawn point order
             chosenSpawnPoint_Unmapped = spawnIndex;
             chosenSpawnPoint = spawnPointOrderMapping[spawnIndex];
-            shownSpawnPoint = chosenSpawnPoint_Unmapped + 1; // This correspond to the ACTUAL number of the spawnpoint on the SpeedrunMap
-            choiceTMPro.text = $"<b>Forced Spawn point: <color=red>{shownSpawnPoint}</color></b>";
-
-            #if DEBUG
-            choiceTMPro.text += $"<color=red> (mapped: {chosenSpawnPoint})</color>";
-            #endif
+            // shownSpawnPoint = chosenSpawnPoint_Unmapped + 1; // This correspond to the ACTUAL number of the spawnpoint on the SpeedrunMap
+            DisplaySpawnPoint();
         }
+    }
+
+    private void DisplaySpawnPoint()
+    {
+        choiceTMPro.text = $"<b>Spawn point: <color=red>{shownSpawnPoint}</color></b>";
+
+        #if DEBUG
+        choiceTMPro.text += $"<color=red> (mapped: {chosenSpawnPoint})</color>";
+        #endif
+
+        Plugin.showRecords.UpdateRecordsTables();
     }
 }

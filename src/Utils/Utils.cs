@@ -87,23 +87,6 @@ public static class Utils
         return minimapSprite;
     }
 
-    public static Sprite LoadTimeRecordsFromConfig()
-    {
-        AssetBundle assetBundle = Utils.LoadOrGetKnightfallBundle();
-        if (assetBundle == null)
-            return null;
-
-        Sprite minimapSprite = null;
-        Texture2D texture = assetBundle.LoadAsset<Texture2D>("Assets/Sprites/minimap-v2.jpg");
-        if (texture != null)
-        {
-            // Convert the Texture2D to a Sprite (if necessary for UI)
-            minimapSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
-        }
-
-        return minimapSprite;
-    }
-
     // Helper method to parse a comma-separated string into a float array
     // for the TimeRecords config
     public static float[] GetRecordsList()
@@ -115,7 +98,7 @@ public static class Utils
         }
         catch (Exception ex)
         {
-            Plugin.Log.LogError($"Failed to parse float list: {ex.Message}");
+            Plugin.Log.LogError($"GetRecordsList -> Failed to parse float list: {ex.Message}");
             return [-1,-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]; // Return default if parsing fails
         }
     }
