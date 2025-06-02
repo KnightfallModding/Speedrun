@@ -39,10 +39,6 @@ internal class Plugin : MelonMod
 
         ENABLED = mlCategory.CreateEntry("Enabled", true);
         MAP_KEY = mlCategory.CreateEntry("ToggleMapKey", KeyCode.M);
-
-        // Remove all Harmony Patches
-        if (!ENABLED.Value)
-            UnloadMod();
     }
 
     /// <summary>
