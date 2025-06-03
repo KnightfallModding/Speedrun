@@ -1,22 +1,17 @@
 using Il2CppTMPro;
 using UnityEngine;
-using MelonLoader;
 using UnityEngine.UI;
 
 namespace Speedrun;
+
 public class ShowRecords : MonoBehaviour
 {
     private TextMeshProUGUI recordsText1;
     private TextMeshProUGUI recordsText2;
+    private Canvas minimapChoiceCanvas;
 
     private void Start()
     {
-        RecordsHandler.LoadRecords();
-
-        Melon<Plugin>.Logger.Msg($"Loaded records from config: {RecordsHandler.AsString()}");
-
-        Canvas minimapChoiceCanvas = Plugin.spawnMap.GetComponent<Canvas>();
-               
         // Add 'Best times' text
         GameObject bestTimesGO = new GameObject("BestTime");
         bestTimesGO.transform.SetParent(minimapChoiceCanvas.transform);
@@ -51,19 +46,19 @@ public class ShowRecords : MonoBehaviour
 
         recordsTable1GO.transform.SetParent(recordsTablesGO.transform);
         recordsTable2GO.transform.SetParent(recordsTablesGO.transform);
-        
+
         recordsTable1GO.AddComponent<LayoutElement>();
         recordsTable2GO.AddComponent<LayoutElement>();
-        
+
         recordsText1 = recordsTable1GO.AddComponent<TextMeshProUGUI>();
         recordsText2 = recordsTable2GO.AddComponent<TextMeshProUGUI>();
-        
+
         recordsText1.alignment = TextAlignmentOptions.Left;
         recordsText2.alignment = TextAlignmentOptions.Left;
         recordsText1.fontSize = 23;
         recordsText2.fontSize = 23;
-        
-        
+
+
         RectTransform rectTransform1 = recordsTable1GO.GetComponent<RectTransform>();
         RectTransform rectTransform2 = recordsTable2GO.GetComponent<RectTransform>();
         rectTransform1.sizeDelta = new Vector2(250, 100);
@@ -73,10 +68,10 @@ public class ShowRecords : MonoBehaviour
         rectTransform1.anchorMax = new Vector2(1, 1); // Top-Right anchor
         rectTransform1.pivot = new Vector2(1, 1);     // Pivot also in top-right corner
 
-        UpdateRecordsTables();
+        RefreshRecordsTables();
     }
 
-    public void UpdateRecordsTables()
+    public void RefreshRecordsTables()
     {
         float[] records = RecordsHandler.GetRecords();
 
@@ -84,14 +79,14 @@ public class ShowRecords : MonoBehaviour
         string recordsTable2 = "";
 
         int m = records.Length / 2;
-        for(int i = 0; i < records.Length; i++)
+        for (int i = 0; i < records.Length; i++)
         {
             int spawn = i + 1;
             string formattedRecord = records[i] != -1 ? Timer.GetFormattedTime(records[i]) : "N/A";
-            
+
             // Add leading spaces for 8 and 9 to be aligned with the other double-digits spawn points
             string entry = (spawn == 8 || spawn == 9) ? $"Spawn   {spawn}: {formattedRecord}\n" : $"Spawn {spawn}: {formattedRecord}\n";
-            if (spawn == SpawnMap.shownSpawnPoint)
+            if (spawn == SpawnHandler.shownSpawnPoint)
             {
                 entry = "<color=yellow>" + entry + "</color>";
             }
@@ -100,7 +95,15 @@ public class ShowRecords : MonoBehaviour
             else recordsTable2 += entry;
         }
 
-        recordsText1.text = recordsTable1;
-        recordsText2.text = recordsTable2;
+        if (recordsText1 != null && recordsText2 != null)
+        {
+            recordsText1.text = recordsTable1;
+            recordsText2.text = recordsTable2;
+        }
+    }
+
+    public void SetMinimapCanvas(Canvas canvas)
+    {
+        this.minimapChoiceCanvas = canvas;
     }
 }

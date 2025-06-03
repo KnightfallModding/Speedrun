@@ -1,5 +1,4 @@
 using Il2Cpp;
-using MelonLoader;
 using UnityEngine;
 using Il2CppTMPro;
 
@@ -51,7 +50,7 @@ public class Timer : MonoBehaviour
     {
         // This is required to display the 'expected' spawn point to the user.
         // This corresponds to the actual numbers shown on the SpeedrunMap.
-        int spawn = SpawnMap.shownSpawnPoint;
+        int spawn = SpawnHandler.shownSpawnPoint;
         float record = RecordsHandler.GetRecord(spawn-1);
 
         string formattedBest = record != -1 ? GetFormattedTime(record) : "N/A";

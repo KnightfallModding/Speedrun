@@ -1,16 +1,18 @@
 using Il2Cpp;
 using System.IO;
-using Il2CppPhoton.Pun;
 using UnityEngine;
-using System.Linq;
 using MelonLoader;
+using Il2CppPhoton.Pun;
 using MelonLoader.Utils;
-using System;
 
 namespace Speedrun;
 
 public static class Utils
 {
+    private const string BUNDLE_NAME = "knightfall.speedrun.bundle";
+    private const string MINIMAP_ASSET_PATH = "Assets/Sprites/minimap-v2.jpg";
+    private const string REFRESH_BUTTON_ASSET_PATH = "Assets/Sprites/refresh.png";
+
     private static Il2CppAssetBundle knightfallAssetBundle = null;
 
     public static string GetFullAssetPath(string assetName)
@@ -21,7 +23,7 @@ public static class Utils
 
     public static string GetKnightfallBundlePath()
     {
-        return GetFullAssetPath("knightfall.speedrun.bundle");
+        return GetFullAssetPath(BUNDLE_NAME);
     }
 
     public static Il2CppAssetBundle LoadOrGetKnightfallBundle()
@@ -33,7 +35,9 @@ public static class Utils
         }
         else
         {
-            Melon<Plugin>.Logger.Msg($"Loading knightfall bundle...");
+#if DEBUG
+            Melon<Plugin>.Logger.Msg($"Loading {BUNDLE_NAME} bundle...");
+#endif
 
             string bundlePath = GetKnightfallBundlePath();
             if (!File.Exists(bundlePath))
@@ -45,7 +49,7 @@ public static class Utils
             knightfallAssetBundle = Il2CppAssetBundleManager.LoadFromFile(bundlePath);
             if (knightfallAssetBundle == null)
             {
-                Melon<Plugin>.Logger.Error($"An error occurred when loading bundle {bundlePath}. The bundle may be corrupted.");
+                Melon<Plugin>.Logger.Error($"An error occurred when loading bundle from {bundlePath}. The bundle may be corrupted.");
             }
 
             return knightfallAssetBundle;
@@ -61,10 +65,10 @@ public static class Utils
         bool inQueueOrInGame = PhotonNetwork.InRoom;
         if (!inQueueOrInGame)
             return false;
-            
+
         bool max2Players = PhotonNetwork.CurrentRoom.PlayerCount <= 2;
         bool isCustom = PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("CustomGame");
-        
+
         return inQueueOrInGame && max2Players && isCustom;
     }
 
@@ -80,13 +84,28 @@ public static class Utils
             return null;
 
         Sprite minimapSprite = null;
-        Texture2D texture = assetBundle.LoadAsset<Texture2D>("Assets/Sprites/minimap-v2.jpg");
+        Texture2D texture = assetBundle.LoadAsset<Texture2D>(MINIMAP_ASSET_PATH);
+
+        // Convert the Texture2D to a Sprite
         if (texture != null)
-        {
-            // Convert the Texture2D to a Sprite
             minimapSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
-        }
 
         return minimapSprite;
+    }
+
+    public static Sprite LoadResetButtonSprite()
+    {
+        Il2CppAssetBundle assetBundle = LoadOrGetKnightfallBundle();
+        if (assetBundle == null)
+            return null;
+
+        Sprite resetBtnSprite = null;
+        Texture2D texture = assetBundle.LoadAsset<Texture2D>(REFRESH_BUTTON_ASSET_PATH);
+
+        // Convert the Texture2D to a Sprite
+        if (texture != null)
+            resetBtnSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+
+        return resetBtnSprite;
     }
 }

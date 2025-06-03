@@ -1,17 +1,18 @@
-using Il2CppTMPro;
 using System;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
-using UnityEngine.Events;
 using MelonLoader;
+using UnityEngine;
+using Il2CppTMPro;
+using UnityEngine.UI;
+using UnityEngine.Events;
+using UnityEngine.EventSystems;
+using System.Collections.Generic;
 
 namespace Speedrun;
+
 public class SpawnMap : MonoBehaviour
 {
-    private Vector2[] spawnPointCoordInJPG =
-    {
+    private readonly Vector2[] spawnPointCoordInJPG =
+    [
             new(40, 1640),   // 1 - added X offset by hand
             new(218, 1640),
             new(139, 1446),
@@ -26,8 +27,8 @@ public class SpawnMap : MonoBehaviour
             new(1748, 800),  // 12 - added Y offset by hand
             new(1485, 350),  // 13 - added Y offset by hand
             new(1624, 180)   // 14 - added Y offset by hand
-    };
-    
+    ];
+
     // Actual spawn order based on the map from discord
     //
     // Spawn numbers are based off the map
@@ -37,7 +38,7 @@ public class SpawnMap : MonoBehaviour
     // when calling `RPCA_InitPlayer(0)` and the last one for `RPCA_InitPlayer(13)`
     //
     // Spawn order: 1, 2, 4, 6, 7, 9, 10, 11, 12, 13, 14, 3, 8, 5
-    public int[] spawnPointOrderMapping = // I won't even explain how I obtained these... xd
+    private readonly int[] spawnPointOrderMapping = // I won't even explain how I obtained these... xd
     [
         0,
         1,
@@ -55,28 +56,16 @@ public class SpawnMap : MonoBehaviour
         10
     ];
 
-    private static Vector2 minimapSize = new(500, 500); // NOTE: Do NOT change this. Minimap coords are supposed to be dynamic but for some reason it does not work at all with other values than (500, 500)
-    private static Vector2 spawnButtonSize = new(30, 30);
-    private static TextMeshProUGUI choiceTMPro;
-
-    public static int chosenSpawnPoint = 0;
-    private static int _chosenSpawnPoint_Unmapped;
-    public static int chosenSpawnPoint_Unmapped
-    {
-        get => _chosenSpawnPoint_Unmapped;
-        set
-        {
-            _chosenSpawnPoint_Unmapped = value;
-            shownSpawnPoint = _chosenSpawnPoint_Unmapped + 1;
-        }
-    }
-    public static int shownSpawnPoint = 1; // always chosenSpawnPoint_Unmapped+1
-    private static List<Image> buttonImages = new();
+    // NOTE: Do NOT change this.
+    // Minimap coords are supposed to be dynamic but for some reason
+    // it does not work at all with other values than (500, 500).
+    private Vector2 minimapSize = new(500, 500);
+    private Vector2 spawnButtonSize = new(30, 30);
+    private TextMeshProUGUI choiceTMPro;
+    private List<Image> buttonImages = new();
 
     public void Start()
     {
-        // var logger = BepInEx.Logging.Logger.CreateLogSource("SpawnMap");
-
         // 1. Load minimap image & find canvas
         Sprite minimapSprite = Utils.LoadMinimapSprite();
 
@@ -102,7 +91,7 @@ public class SpawnMap : MonoBehaviour
         int originalWidth = 1853;
         int originalHeight = 1707;
 
-        Vector2 canvasOffset = new(-20, 30); // 20 pixels from bottom and 30 for right
+        Vector2 canvasOffset = new(-20, 30);         // 20 pixels from bottom and 30 for right
         Vector2 canvasSize = minimapSize;
 
         // Calculate the scale multiplier based on the original image dimensions and the canvas size
@@ -112,23 +101,17 @@ public class SpawnMap : MonoBehaviour
         // Use the smaller scale to ensure the aspect ratio is preserved
         float scaleFactor = Mathf.Min(scaleMultiplierX, scaleMultiplierY);
 
-        // float scaleMultiplier = ((originalHeight / canvasSize.x) + (originalWidth / canvasSize.y)) / 2 ;
-
         // Set the position and size of the minimap
         rectTransform.anchoredPosition = canvasOffset;
         rectTransform.sizeDelta = new Vector2(500, 500);
 
         // Add a button on each spawn point of the map
-        // Need to get the spawnpoint coordinates on the minimap JPEG
-        // ..........................................................
-        Button[] choiceButtons = new Button[14];
         int i = 0;
         foreach (Vector2 jpgPoint in spawnPointCoordInJPG)
         {
             // Scale the points based on the scale factor
             float scaledX = jpgPoint.x * scaleFactor;
             float scaledY = jpgPoint.y * scaleFactor;
-            // Melon<Plugin>.Logger.Msg($"ScaledX = {scaledX} | ScaledY = {scaledY}");
 
             // Create a button at the calculated position
             GameObject buttonObject = new($"SpawnPointButton{i}");
@@ -140,11 +123,11 @@ public class SpawnMap : MonoBehaviour
             buttonImages.Add(spawnButtonImage);
 
             // Set a simple color (could be image too) for the button
-            #if DEBUG
+#if DEBUG
             spawnButtonImage.color = new Color(1, 0, 0, 0.6f);
-            #else
+#else
             spawnButtonImage.color = Color.clear; // transparent button
-            #endif
+#endif
 
             float finalX = (scaledX + canvasOffset.x) - canvasSize.x;
             float finalY = canvasSize.y - (scaledY); // Adjust the Y axis to match Unity's coordinate system (bottom-left origin)
@@ -176,8 +159,6 @@ public class SpawnMap : MonoBehaviour
             exitEntry.callback.AddListener((UnityAction<BaseEventData>)((eventData) => { OnPointerExit(spawnIndex); }));
             trigger.triggers.Add(exitEntry);
 
-            // Store the button reference
-            choiceButtons[i] = spawnButton;
             i++;
         }
 
@@ -187,16 +168,7 @@ public class SpawnMap : MonoBehaviour
         Image resetButtonImage = resetButtonObject.AddComponent<Image>();
         resetButtonObject.transform.SetParent(minimapChoiceCanvas.transform);
 
-        Il2CppAssetBundle assetBundle = Utils.LoadOrGetKnightfallBundle();
-        Sprite resetButtonSprite = null;
-
-        Texture2D texture = assetBundle.LoadAsset<Texture2D>("Assets/Sprites/refresh.png");
-        if (texture != null)
-        {
-            // Convert the Texture2D to a Sprite (if necessary for UI)
-            resetButtonSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
-        }
-
+        Sprite resetButtonSprite = Utils.LoadResetButtonSprite();
         resetButtonImage.sprite = resetButtonSprite;
 
         // Set refresh button pos
@@ -211,7 +183,7 @@ public class SpawnMap : MonoBehaviour
         resetButton.onClick.AddListener(new Action(() => OnButtonClicked(-1)));
 
         EventTrigger resetTrigger = resetButtonObject.AddComponent<EventTrigger>();
-        
+
         // Set up OnPointerEnter event
         EventTrigger.Entry resetEnterEntry = new();
         resetEnterEntry.eventID = EventTriggerType.PointerEnter;
@@ -290,33 +262,23 @@ public class SpawnMap : MonoBehaviour
     public void ShowMap()
     {
         if (this.GetComponent<Canvas>() != null)
-        {
             this.GetComponent<Canvas>().enabled = true;
-        }
 
-        foreach (Image img in buttonImages)
-        {
-            img.gameObject.SetActive(true);
-        }
+        buttonImages.ForEach(img => img.gameObject.SetActive(true));
     }
 
     public void HideMap()
     {
         if (this.GetComponent<Canvas>() != null)
-        {
             this.GetComponent<Canvas>().enabled = false;
-        }
 
         // We must also SetActive(false) to prevent the buttons from being navigable
         // using arrow keys while the map is hidden
-        foreach (Image img in buttonImages)
-        {
-            img.gameObject.SetActive(false);
-        }
+        buttonImages.ForEach(img => img.gameObject.SetActive(false));
     }
 
     public void OnPointerEnter(int ind)
-    {
+    {          
         if (ind == -1) // Reset button
         {
             buttonImages[^1].color = new Color(Color.red.r, Color.red.g, Color.red.b, 0.85f);
@@ -332,19 +294,19 @@ public class SpawnMap : MonoBehaviour
     {
         if (ind == -1) // Reset button
         {
-            #if DEBUG
+#if DEBUG
             buttonImages[^1].color = new Color(1, 0, 0, 0.6f);
-            #else
+#else
             buttonImages[^1].color = Color.white;
-            #endif
+#endif
         }
         else
         {
-            #if DEBUG
+#if DEBUG
             buttonImages[ind].color = new Color(1, 0, 0, 0.6f);
-            #else
+#else
             buttonImages[ind].color = Color.clear; // transparent button
-            #endif
+#endif
         }
     }
 
@@ -353,27 +315,27 @@ public class SpawnMap : MonoBehaviour
         // Reset button
         if (spawnIndex == -1)
         {
-            chosenSpawnPoint = 0;
-            chosenSpawnPoint_Unmapped = 0;
+            SpawnHandler.chosenSpawnPoint = 0;
+            SpawnHandler.chosenSpawnPoint_Unmapped = 0;
             DisplaySpawnPoint();
         }
         else
         {
             // Set chosen index to be accessed globally AFTER mapping to real in-game spawn point order
-            chosenSpawnPoint_Unmapped = spawnIndex;
-            chosenSpawnPoint = spawnPointOrderMapping[spawnIndex];
+            SpawnHandler.chosenSpawnPoint_Unmapped = spawnIndex;
+            SpawnHandler.chosenSpawnPoint = spawnPointOrderMapping[spawnIndex];
             DisplaySpawnPoint();
         }
     }
 
     private void DisplaySpawnPoint()
     {
-        choiceTMPro.text = $"<b>Spawn point: <color=red>{shownSpawnPoint}</color></b>";
+        choiceTMPro.text = $"<b>Spawn point: <color=red>{SpawnHandler.shownSpawnPoint}</color></b>";
 
-        #if DEBUG
-        choiceTMPro.text += $"<color=red> (mapped: {chosenSpawnPoint})</color>";
-        #endif
+#if DEBUG
+        choiceTMPro.text += $"<color=red> (mapped: {SpawnHandler.chosenSpawnPoint})</color>";
+#endif
 
-        Plugin.showRecords.UpdateRecordsTables();
+        MinimapLifecycle.showRecords.RefreshRecordsTables();
     }
 }
