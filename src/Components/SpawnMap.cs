@@ -9,6 +9,7 @@ using System.Collections.Generic;
 
 namespace Speedrun;
 
+[RegisterTypeInIl2Cpp]
 public class SpawnMap : MonoBehaviour
 {
     private readonly Vector2[] spawnPointCoordInJPG =
@@ -278,7 +279,7 @@ public class SpawnMap : MonoBehaviour
     }
 
     public void OnPointerEnter(int ind)
-    {          
+    {
         if (ind == -1) // Reset button
         {
             buttonImages[^1].color = new Color(Color.red.r, Color.red.g, Color.red.b, 0.85f);

@@ -1,9 +1,11 @@
 using Il2Cpp;
 using UnityEngine;
 using Il2CppTMPro;
+using MelonLoader;
 
 namespace Speedrun;
 
+[RegisterTypeInIl2Cpp]
 public class Timer : MonoBehaviour
 {
     private bool hasStarted = false;

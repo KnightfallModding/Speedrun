@@ -1,9 +1,11 @@
+using MelonLoader;
 using Il2CppTMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Speedrun;
 
+[RegisterTypeInIl2Cpp]
 public class ShowRecords : MonoBehaviour
 {
     private TextMeshProUGUI recordsText1;
