@@ -68,7 +68,7 @@ public class SpawnMap : MonoBehaviour
     public void Start()
     {
         // 1. Load minimap image & find canvas
-        Sprite minimapSprite = Utils.LoadMinimapSprite();
+        Sprite minimapSprite = BundleHelper.LoadMinimapSprite();
 
         Melon<Plugin>.Logger.Msg($"Creating minimap with choices...");
 
@@ -169,7 +169,7 @@ public class SpawnMap : MonoBehaviour
         Image resetButtonImage = resetButtonObject.AddComponent<Image>();
         resetButtonObject.transform.SetParent(minimapChoiceCanvas.transform);
 
-        Sprite resetButtonSprite = Utils.LoadResetButtonSprite();
+        Sprite resetButtonSprite = BundleHelper.LoadResetButtonSprite();
         resetButtonImage.sprite = resetButtonSprite;
 
         // Set refresh button pos

@@ -25,6 +25,13 @@
     <ModLink>https://github.com/KnightfallModding/Speedrun</ModLink>
   </PropertyGroup>
   
+  <!-- Add bundled resources -->
+  <ItemGroup>
+    <EmbeddedResource Include="src\Assets\knightfall.speedrun.bundle">
+      <LogicalName>knightfall.speedrun.bundle</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="LavaGang.MelonLoader" Version="0.7.0" />
   </ItemGroup>
